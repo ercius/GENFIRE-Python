@@ -19,26 +19,27 @@ PI = np.pi
 try:
     import pyfftw
 
-    #These are just wrappers around various flavors of the FFT
+    # These are just wrappers around various flavors of the FFT
     def rfftn(arr, threads=6):
-        return pyfftw.interfaces.numpy_fft.rfftn(arr,overwrite_input=True,threads=threads)
+        return pyfftw.interfaces.numpy_fft.rfftn(arr, overwrite_input=True, threads=threads)
     def irfftn(arr, threads=6):
-        return pyfftw.interfaces.numpy_fft.irfftn(arr,overwrite_input=True,threads=threads)
+        return pyfftw.interfaces.numpy_fft.irfftn(arr, overwrite_input=True, threads=threads)
     def rfftn_fftshift(arr, threads=6):
-        return pyfftw.interfaces.numpy_fft.fftshift(pyfftw.interfaces.numpy_fft.rfftn(pyfftw.interfaces.numpy_fft.ifftshift(arr),overwrite_input=True,threads=threads))
+        return pyfftw.interfaces.numpy_fft.fftshift(pyfftw.interfaces.numpy_fft.rfftn(pyfftw.interfaces.numpy_fft.ifftshift(arr),
+                                                                                      overwrite_input=True, threads=threads))
     def irfftn_fftshift(arr, threads=6):
-        return pyfftw.interfaces.numpy_fft.fftshift(pyfftw.interfaces.numpy_fft.irfftn(pyfftw.interfaces.numpy_fft.ifftshift(arr),overwrite_input=True,threads=threads))
+        return pyfftw.interfaces.numpy_fft.fftshift(pyfftw.interfaces.numpy_fft.irfftn(pyfftw.interfaces.numpy_fft.ifftshift(arr),
+                                                                                       overwrite_input=True, threads=threads))
     def fftn(arr, threads=6):
-        return pyfftw.interfaces.numpy_fft.fftn(arr,overwrite_input=True,threads=threads)
+        return pyfftw.interfaces.numpy_fft.fftn(arr, overwrite_input=True, threads=threads)
     def ifftn(arr, threads=6):
-        return pyfftw.interfaces.numpy_fft.ifftn(arr,overwrite_input=True,threads=threads)
+        return pyfftw.interfaces.numpy_fft.ifftn(arr, overwrite_input=True, threads=threads)
     def fftn_fftshift(arr, threads=6):
         return pyfftw.interfaces.numpy_fft.fftshift(pyfftw.interfaces.numpy_fft.fftn(pyfftw.interfaces.numpy_fft.ifftshift(arr),overwrite_input=True,threads=threads))
     def ifftn_fftshift(arr, threads=6):
         return pyfftw.interfaces.numpy_fft.fftshift(pyfftw.interfaces.numpy_fft.ifftn(pyfftw.interfaces.numpy_fft.ifftshift(arr),overwrite_input=True,threads=threads))
 
 except ImportError:
-    print("No pyFFTW installation found. Installing pyFFTW will significantly improve the speed of GENFIRE. Consult the documentation for more information. Continuing with NumPy FFT...")
     import numpy as np
     def rfftn(arr):
         return np.fft.rfftn(arr)
@@ -81,7 +82,7 @@ def hermitianSymmetrize(volume):
     dimz = startDims[2]
     flag = False # flag to trigger copying to new odd dimensioned array
 
-    #check if any dimension is odd
+    # check if any dimension is odd
     if dimx % 2 == 0:
         dimx += 1
         flag = True
@@ -94,20 +95,20 @@ def hermitianSymmetrize(volume):
         dimz += 1
         flag = True
 
-    if flag: # if any dimensions are even, create a new with all odd dimensions and copy volume
-        newInput = np.zeros((dimx,dimy,dimz), dtype=complex) #new array
+    if flag:
+        # if any dimensions are even, create a new with all odd dimensions and copy volume
+        newInput = np.zeros((dimx,dimy,dimz), dtype=complex)  # new array
         newInput[:startDims[0], :startDims[1], :startDims[2]] = volume # copy values
-        numberOfValues = (newInput != 0).astype(float) #track number of values for averaging
-        newInput = newInput + np.conj(newInput[::-1, ::-1, ::-1]) # combine Hermitian symmetry mates
-        numberOfValues = numberOfValues + numberOfValues[::-1, ::-1, ::-1] # track number of points included in each sum
+        numberOfValues = (newInput != 0).astype(float)  # track number of values for averaging
+        newInput = newInput + np.conj(newInput[::-1, ::-1, ::-1])  # combine Hermitian symmetry mates
+        numberOfValues = numberOfValues + numberOfValues[::-1, ::-1, ::-1]  # track number of points included in sums
 
         newInput[numberOfValues != 0] /= numberOfValues[numberOfValues != 0] # take average where two values existed
-        newInput[np.isnan(newInput)] = 0 # Shouldn't be any nan, but just to be safe
+        newInput[np.isnan(newInput)] = 0  # Shouldn't be any nan, but just to be safe
 
-        return newInput[:startDims[0], :startDims[1], :startDims[2]] # return original dimensions
-
-
-    else: # otherwise, save yourself the trouble of copying the matrix over. See previous comments for line-by-line
+        return newInput[:startDims[0], :startDims[1], :startDims[2]]  # return original dimensions
+    else:
+        # otherwise, save yourself the trouble of copying the matrix over. See previous comments for line-by-line
         numberOfValues = (volume != 0).astype(float)
         volume = volume + np.conjugate(volume[::-1, ::-1, ::-1])
         numberOfValues = numberOfValues + numberOfValues[::-1, ::-1, ::-1]
@@ -116,7 +117,7 @@ def hermitianSymmetrize(volume):
         return volume
 
 
-def smooth3D(object,resolutionCutoff):
+def smooth3D(object, resolutionCutoff):
     """
     * smooth3D *
 
@@ -148,7 +149,7 @@ def smooth3D(object,resolutionCutoff):
     xx, yy, zz = np.meshgrid(np.arange(0,dims[0])-Xcenter, np.arange(0,dims[1])-Ycenter, np.arange(0,dims[2])-Zcenter)
     sigma  = dims[0]/2*resolutionCutoff
 
-    #construct the filter and normalize
+    # construct the filter and normalize
     K_filter = np.exp(-(((xx)**2 + (yy)**2 + (zz) **2)/(2*sigma*sigma)))
     K_filter /= np.max(np.max(np.max(abs(K_filter))))
 
@@ -163,8 +164,7 @@ def smooth3D(object,resolutionCutoff):
     return np.real(fftn_fftshift(kbinned))
 
 
-
-def smooth2D(object,resolutionCutoff):
+def smooth2D(object, resolutionCutoff):
     """
     * smooth2D *
 
@@ -234,9 +234,9 @@ def calculateProjection_interp(modelK, phi, theta, psi):
     psi *= PI/180
 
     # construct rotation matrix
-    R = np.array([[np.cos(psi)*np.cos(theta)*np.cos(phi)-np.sin(psi)*np.sin(phi) , np.cos(psi)*np.cos(theta)*np.sin(phi)+np.sin(psi)*np.cos(phi)   ,    -np.cos(psi)*np.sin(theta)],
-    [-np.sin(psi)*np.cos(theta)*np.cos(phi)-np.cos(psi)*np.sin(phi), -np.sin(psi)*np.cos(theta)*np.sin(phi)+np.cos(psi)*np.cos(phi) ,   np.sin(psi)*np.sin(theta) ],
-    [np.sin(theta)*np.cos(phi)                               , np.sin(theta)*np.sin(phi)                                ,              np.cos(theta)]])
+    R = np.array([[np.cos(psi)*np.cos(theta)*np.cos(phi)-np.sin(psi)*np.sin(phi), np.cos(psi)*np.cos(theta)*np.sin(phi)+np.sin(psi)*np.cos(phi),    -np.cos(psi)*np.sin(theta)],
+    [-np.sin(psi)*np.cos(theta)*np.cos(phi)-np.cos(psi)*np.sin(phi), -np.sin(psi)*np.cos(theta)*np.sin(phi)+np.cos(psi)*np.cos(phi),   np.sin(psi)*np.sin(theta)],
+    [np.sin(theta)*np.cos(phi), np.sin(theta)*np.sin(phi), np.cos(theta)]])
 
     R = R.T
 
@@ -262,6 +262,7 @@ def calculateProjection_interp(modelK, phi, theta, psi):
     projection = np.reshape(projection, [dims[0], dims[1]], order='F')
 
     return np.real(ifftn_fftshift(projection))
+
 
 def getProjectionInterpolator(modelK):
     """
@@ -292,6 +293,7 @@ def getProjectionInterpolator(modelK):
     # construct interpolator function that does the actual computation
     return RegularGridInterpolator((kx, ky, kz), modelK, bounds_error=False, fill_value=0)
 
+
 def calculateProjection_interp_fromInterpolator(interpolator, phi, theta, psi, dims):
     """
     * calculateProjection_interp_fromInterpolator *
@@ -320,9 +322,9 @@ def calculateProjection_interp_fromInterpolator(interpolator, phi, theta, psi, d
     Zcenter = round(dims[2]//2)
 
     # construct rotation matrix
-    R = np.array([[np.cos(psi)*np.cos(theta)*np.cos(phi)-np.sin(psi)*np.sin(phi) , np.cos(psi)*np.cos(theta)*np.sin(phi)+np.sin(psi)*np.cos(phi)   ,    -np.cos(psi)*np.sin(theta)],
-    [-np.sin(psi)*np.cos(theta)*np.cos(phi)-np.cos(psi)*np.sin(phi), -np.sin(psi)*np.cos(theta)*np.sin(phi)+np.cos(psi)*np.cos(phi) ,   np.sin(psi)*np.sin(theta) ],
-    [np.sin(theta)*np.cos(phi)                               , np.sin(theta)*np.sin(phi)                                ,              np.cos(theta)]])
+    R = np.array([[np.cos(psi)*np.cos(theta)*np.cos(phi)-np.sin(psi)*np.sin(phi), np.cos(psi)*np.cos(theta)*np.sin(phi)+np.sin(psi)*np.cos(phi),    -np.cos(psi)*np.sin(theta)],
+    [-np.sin(psi)*np.cos(theta)*np.cos(phi)-np.cos(psi)*np.sin(phi), -np.sin(psi)*np.cos(theta)*np.sin(phi)+np.cos(psi)*np.cos(phi),   np.sin(psi)*np.sin(theta)],
+    [np.sin(theta)*np.cos(phi), np.sin(theta)*np.sin(phi), np.cos(theta)]])
 
     R = R.T
 
@@ -383,7 +385,7 @@ def calculateProjection_DFT(model, phi, theta, psi, out_dimx, out_dimy):
     X = np.arange(0, dims[0])-Xcenter
     Y = np.arange(0, dims[1])-Ycenter
     Z = np.arange(0, dims[2])-Zcenter
-    X, Y, Z = np.meshgrid(X,Y,Z)
+    X, Y, Z = np.meshgrid(X, Y, Z)
     Y = Y.astype(float)
     X = X.astype(float)
     Z = Z.astype(float)
@@ -420,7 +422,6 @@ def calculateProjection_DFT(model, phi, theta, psi, out_dimx, out_dimy):
                           ( rotKX[i]*X/out_dimx + rotKY[i]*Y/out_dimy + rotKZ[i]*Z/out_dimx ) ) )
     projection = np.reshape(projection, (out_dimx, out_dimy), order='F')
 
-    # return np.real(pyfftw.interfaces.numpy_fft.fftshift(pyfftw.interfaces.numpy_fft.ifftn(pyfftw.interfaces.numpy_fft.ifftshift(projection))))
     return np.real(ifftn_fftshift(projection))
 
 
@@ -455,7 +456,6 @@ def generateKspaceIndices(obj):
         ncK0 = ((dims[0]+1)/2)-1
         vec0 = np.arange(-ncK0, ncK0+1)/ncK0
 
-
     if dims[1] % 2 == 0:
         ncK1 = dims[1]/2
         vec1 = np.arange(-ncK1, ncK1, 1)/ncK1
@@ -483,6 +483,7 @@ def generateKspaceIndices(obj):
     Kindices = np.sqrt(kx**2 + ky**2 + kz**2)
     return Kindices
 
+
 def pointToPlaneDistance(points, norm_vec):
     """
     * pointToPlaneDistance *
@@ -501,10 +502,11 @@ def pointToPlaneDistance(points, norm_vec):
     """
     from numpy.linalg import norm
     norm_vec = norm_vec / norm(norm_vec)
-    if np.ndim(points)>1:
-        distances = np.abs(np.sum(points*norm_vec,axis=1))
+    if np.ndim(points) > 1:
+        distances = np.abs(np.sum(points*norm_vec, axis=1))
         return distances
-    return np.abs(np.dot(points,norm_vec))
+    return np.abs(np.dot(points, norm_vec))
+
 
 def pointToPlaneClosest(points, norm_vec, distances):
     """
@@ -524,10 +526,12 @@ def pointToPlaneClosest(points, norm_vec, distances):
     University of California, Los Angeles
     Copyright 2015-2016. All rights reserved.
     """
-    if np.ndim(points)>1: # use NumPy broadcasting for speed
-        closest_points = points + ( (distances - np.sum(points * norm_vec)) * np.reshape(norm_vec,(3,1)) / np.dot(norm_vec,norm_vec) ).T
+    if np.ndim(points) > 1:  # use NumPy broadcasting for speed
+        closest_points = points + ((distances - np.sum(points * norm_vec)) *
+                                   np.reshape(norm_vec, (3, 1)) / np.dot(norm_vec, norm_vec)).T
         return closest_points
     return points + (distances- np.dot(points, norm_vec)) * norm_vec
+
 
 def printStringOrNumpyArray(value, name):
     if isinstance(value, np.ndarray):
