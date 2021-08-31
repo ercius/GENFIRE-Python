@@ -243,7 +243,7 @@ if __name__ != "__main__":
         FFT gridding function for converting a set of 2D projection images into a 3D Fourier grid
 
         :param projections: N x N x num_projections NumPy array containing the projections
-        :param angles: 3 x num_projections NumPy array of Euler angles phi,theta, psi
+        :param angles: 3 x num_projections NumPy array of Euler angles phi,theta, psi (degrees)
         :param interpolationCutoffDistance: Radius of interpolation kernel. Only values within this radius of a grid point are considered
         :param enforce_resolution_circle: boolean; whether or not to truncate reciprocal space to Nyquist frequency
         :param permitMultipleGridding: Default True
@@ -393,7 +393,7 @@ if __name__ != "__main__":
         DFT gridding function for converting a set of 2D projection images into a 3D Fourier grid
 
         :param projections: N x N x num_projections NumPy array containing the projections
-        :param angles: 3 x num_projections NumPy array of Euler angles phi,theta, psi
+        :param angles: 3 x num_projections NumPy array of Euler angles phi,theta, psi (degrees)
         :param interpolationCutoffDistance: Radius of interpolation kernel. Only values within this radius of a grid point are considered
         :param enforce_resolution_circle: boolean; whether or not to truncate reciprocal space to Nyquist frequency
         :param verbose: Default value True
@@ -903,7 +903,7 @@ class GenfireReconstructor():
 
         """
         :param projections: (string or numpy.ndarray) file containing projections or numpy array with projections
-        :param eulerAngles: (string or numpy.ndarray) file containing Euler angles or numpy array with Euler angles
+        :param eulerAngles: (string or numpy.ndarray) file containing Euler angles or numpy array with Euler angles (degrees)
         :param support: (string or numpy.ndarray) file containing support or numpy array with support
         :param resultsFilename: (string or numpy.ndarray) file in which to store reconstruction volume
         :param initialObject: (string or numpy.ndarray) (optional) filename containing intial object or numpy array with initial object

@@ -264,6 +264,8 @@ def loadAngles(filename):
     """
     * loadAngles *
 
+    The tilt angles should be in degrees.
+
     Author: Alan (AJ) Pryor, Jr.
     Jianwei (John) Miao Coherent Imaging Group
     University of California, Los Angeles
