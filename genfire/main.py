@@ -61,6 +61,7 @@ def main_InteractivelySetParameters():
 
     main(reconstruction_parameters)
 
+
 def main(reconstruction_parameters):
     import genfire.fileio
 
@@ -86,7 +87,7 @@ def main(reconstruction_parameters):
     else:
         filename_initialObject               = None
 
-    ### begin reconstruction ###
+    # ### begin reconstruction ###
     projections = genfire.fileio.loadProjections(filename_projections) # load projections into a 3D numpy array
 
     # get dimensions of array and determine the array size after padding
@@ -106,7 +107,7 @@ def main(reconstruction_parameters):
     support = np.pad(support,((padding,padding),(padding,padding),(padding,padding)),'constant')
     projections = np.pad(projections,((padding,padding),(padding,padding),(0,0)),'constant')
 
-    #load initial object, or initialize it to zeros if none was given
+    # load initial object, or initialize it to zeros if none was given
     if filename_initialObject is not None and os.path.isfile(filename_initialObject):
         initialObject = genfire.fileio.readVolume(filename_initialObject)
         initialObject = np.pad(initialObject,((padding,padding),(padding,padding),(padding,padding)),'constant')
@@ -181,11 +182,12 @@ def main(reconstruction_parameters):
         R_freeInd_complex = []
         R_freeVals_complex = []
 
-    if resolutionExtensionSuppressionState==1: # resolution extension/suppression
-        constraintEnforcementDelayIndicators = np.array(np.concatenate((np.arange(0.95, -.25, -0.15), np.arange(-0.15, .95, .1)), axis=0))
-    elif resolutionExtensionSuppressionState==2:# no resolution extension or suppression
+    if resolutionExtensionSuppressionState == 1:  # resolution extension/suppression
+        constraintEnforcementDelayIndicators = np.array(np.concatenate((np.arange(0.95, -.25, -0.15),
+                                                                        np.arange(-0.15, .95, .1)), axis=0))
+    elif resolutionExtensionSuppressionState == 2:  # no resolution extension or suppression
         constraintEnforcementDelayIndicators = np.array([-999, -999, -999, -999])
-    elif resolutionExtensionSuppressionState==3:# resolution extension only
+    elif resolutionExtensionSuppressionState == 3:  # resolution extension only
         constraintEnforcementDelayIndicators = np.concatenate((np.arange(0.95, -.15, -0.15),[-0.15, -0.15, -0.15]))
     else:
         print("Warning! Input resolutionExtensionSuppressionState does not match an available option. Deactivating dynamic constraint enforcement and continuing.\n")
@@ -199,34 +201,36 @@ def main(reconstruction_parameters):
     reconstructionOutputs['reconstruction'] = reconstructionOutputs['reconstruction'][ncBig-n2:ncBig+n2,ncBig-n2:ncBig+n2,ncBig-n2:ncBig+n2]
     genfire.fileio.saveResults(reconstructionOutputs, filename_results)
 
+
 if __name__ == "__main__" and len(sys.argv) == 1:
-    print ("starting with user parameters")
+    print("starting with user parameters")
     main_InteractivelySetParameters()
 elif __name__ == "__main__":
-    if len(sys.argv) > 1: # Parse inputs provided either from the GUI or from the command line
-        inputArgumentOptions = {"-p" :  "filename_projections",
-                                "-a" :  "filename_angles",
-                                "-s" :  "filename_support",
-                                "-o" :  "filename_results",
-                                "-i" :  "filename_initialObject",
-                                "-r" :  "resolutionExtensionSuppressionState",
+    if len(sys.argv) > 1:  # Parse inputs provided either from the GUI or from the command line
+        inputArgumentOptions = {"-p":  "filename_projections",
+                                "-a":  "filename_angles",
+                                "-s":  "filename_support",
+                                "-o":  "filename_results",
+                                "-i":  "filename_initialObject",
+                                "-r":  "resolutionExtensionSuppressionState",
                                 "-it":  "numIterations",
                                 "-or":  "oversamplingRatio",
-                                "-t" :  "interpolationCutoffDistance",
-                                "-d" :  "displayFigure",
+                                "-t":  "interpolationCutoffDistance",
+                                "-d":  "displayFigure",
                                 "-rf":  "calculateRFree"
                                 }
-        print (sys.argv[:])
-        if len(sys.argv)%2==0:
+        print(sys.argv[:])
+        if len(sys.argv) % 2 == 0:
             raise Exception("Number of input options and input arguments does not match!")
-        for argumentNum in range(1,len(sys.argv),2):
-            print (inputArgumentOptions[sys.argv[argumentNum]])
-            print  (sys.argv[argumentNum+1])
-            print (inputArgumentOptions[sys.argv[argumentNum]] + "=" + sys.argv[argumentNum+1])
+        for argumentNum in range(1, len(sys.argv), 2):
+            print(inputArgumentOptions[sys.argv[argumentNum]])
+            print(sys.argv[argumentNum+1])
+            print(inputArgumentOptions[sys.argv[argumentNum]] + "=" + sys.argv[argumentNum+1])
 
-
-            exec(inputArgumentOptions[sys.argv[argumentNum]] + "= '" + sys.argv[argumentNum+1] +"'")
-            print("Setting argument %s from option %s equal to GENFIRE parameter %s " % (sys.argv[argumentNum+1],sys.argv[argumentNum], inputArgumentOptions[sys.argv[argumentNum]] ))
+            exec(inputArgumentOptions[sys.argv[argumentNum]] + "= '" + sys.argv[argumentNum+1] + "'")
+            print("Setting argument %s from option %s equal to GENFIRE parameter %s " % (sys.argv[argumentNum+1],
+                                                                                         sys.argv[argumentNum],
+                                                                                         inputArgumentOptions[sys.argv[argumentNum]]))
 
         numIterations = int(numIterations)
         # displayFigure = bool(displayFigure)
