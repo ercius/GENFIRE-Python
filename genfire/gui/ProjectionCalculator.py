@@ -134,7 +134,9 @@ class ProjectionCalculator(QtWidgets.QMainWindow):
                 phi = angles[:, 0]
                 theta = angles[:, 1]
                 psi = angles[:, 2]
-                filename = self.calculationParameters.outputFilename +'.npy'
+                #filename = self.calculationParameters.outputFilename +'.npy'
+                filename = self.calculationParameters.outputFilename
+                filename = toString(filename)
                 projections = np.zeros((self.calculationParameters.dims[0],self.calculationParameters.dims[1],np.size(phi)),dtype=float)
                 if self.calculationParameters.interpolator is None:
                     self.calculationParameters.interpolator = genfire.utility.getProjectionInterpolator(self.calculationParameters.model)
