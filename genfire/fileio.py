@@ -42,7 +42,6 @@ def readVolume(filename, order="C"):
 def readMAT_volume(filename):
     # wrapper around scipy's loadmat
 
-    import numpy as np
     import scipy.io
     data = scipy.io.loadmat(filename)
     var_name = [key for key in data if not key.startswith("__")]
@@ -63,6 +62,8 @@ def readMRC(filename, dtype=float, order="C"):
     Read in a volume in .mrc file format. See http://bio3d.colorado.edu/imod/doc/mrc_format.txt
 
     :param filename: Filename of .mrc
+    :param dtype: The data type to return as
+    :param order: The order to return as (C- or F-)
     :return: NumPy array containing the .mrc data
 
     Author: Alan (AJ) Pryor, Jr.
