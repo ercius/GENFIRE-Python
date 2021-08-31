@@ -1040,14 +1040,14 @@ class GenfireReconstructor():
                                                                   eulerAngles,
                                                                   self.params.interpolationCutoffDistance,
                                                                   self.params.enforceResolutionCircle,
-                                                                  self.params.verbose)
+                                                                  verbose=self.params.verbose)
         else:
             measuredK = genfire.reconstruct.fillInFourierGrid(projections,
                                                               eulerAngles,
                                                               self.params.interpolationCutoffDistance,
                                                               self.params.enforceResolutionCircle,
                                                               self.params.permitMultipleGridding,
-                                                              self.params.verbose)
+                                                              verbose=self.params.verbose)
 
         measuredK = np.fft.ifftshift(measuredK)
 
@@ -1113,24 +1113,24 @@ class GenfireReconstructor():
             constraintEnforcementDelayIndicators = np.concatenate((np.arange(0.95, -.15, -0.15), [-0.15, -0.15, -0.15]))
         else:
             if self.params.verbose:
-                print(
-                    "Warning! Input resolutionExtensionSuppressionState does not match an available option. Deactivating dynamic constraint enforcement and continuing.\n")
+                print("Warning! Input resolutionExtensionSuppressionState does not match an available option. "
+                      "Deactivating dynamic constraint enforcement and continuing.")
                 constraintEnforcementDelayIndicators = np.array([-999, -999, -999, -999])
 
         results = reconstruct(self.params.numIterations,
                               np.fft.fftshift(initialObject),
                               np.fft.fftshift(support),
-                              (measuredK)[:, :, 0:(np.shape(measuredK)[-1] // 2 + 1)],
-                              (resolutionIndicators)[:, :, 0:(np.shape(measuredK)[-1] // 2 + 1)],
+                              measuredK[:, :, 0:(np.shape(measuredK)[-1] // 2 + 1)],
+                              resolutionIndicators[:, :, 0:(np.shape(measuredK)[-1] // 2 + 1)],
                               constraintEnforcementDelayIndicators,
                               R_freeInd_complex,
                               R_freeVals_complex,
                               self.params.displayFigure,
                               self.params.constraintPositivity,
                               self.params.constraintSupport,
-                              self.params.verbose)
+                              verbose=self.params.verbose)
         ncBig = paddedDim // 2
         n2 = dims[0] // 2
         results['reconstruction'] = results['reconstruction'][ncBig - n2:ncBig + n2, ncBig - n2:ncBig + n2,
-                                    ncBig - n2:ncBig + n2]
+                                                              ncBig - n2:ncBig + n2]
         return results
