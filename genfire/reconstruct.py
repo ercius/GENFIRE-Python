@@ -66,15 +66,6 @@ if __name__ != "__main__":
             Rfree_complex_bybin = np.zeros((np.shape(R_freeInd_complex)[2], numIterations),dtype=float)
             Rfree_complex_total = np.zeros(numIterations,dtype=float)
 
-        if displayFigure.DisplayFigureON: #setup some indices for plotting.
-            n_half_x = int(dims[0]/2) #this assumes even-sized arrays
-            n_half_y = int(dims[1]/2)
-            n_half_z = int(dims[2]/2)
-
-            half_window_x = displayFigure.reconstructionDisplayWindowSize[0]//2
-            half_window_y = displayFigure.reconstructionDisplayWindowSize[1]//2
-            half_window_z = displayFigure.reconstructionDisplayWindowSize[2]//2
-
         #setup output dict
         if R_freeInd_complex:
             outputs = {'reconstruction':initialObject,'errK':errK,'R_free_bybin':Rfree_complex_bybin, "R_free_total":Rfree_complex_total}
