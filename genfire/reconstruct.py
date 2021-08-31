@@ -16,15 +16,17 @@ from __future__ import division
 #matplotlib.use("Qt5Agg")
 #import matplotlib.pyplot as plt
 import os
-import scipy.io
 import time
-import genfire
 from multiprocessing import Pool
+
+import scipy.io
+import genfire
+
 from genfire.utility import *
 
 PI = np.pi
 if __name__ != "__main__":
-    def reconstruct(numIterations, initialObject, support, measuredK, constraintIndicators, constraintEnforcementDelayIndicators, R_freeInd_complex, R_freeVals_complex, displayFigure, use_positivity=True, use_support=True, verbose=True):
+    def reconstruct(numIterations, initialObject, support, measuredK, constraintIndicators, constraintEnforcementDelayIndicators, R_freeInd_complex, R_freeVals_complex, use_positivity=True, use_support=True, verbose=True):
         """
          * reconstruct *
 
@@ -38,7 +40,6 @@ if __name__ != "__main__":
         :param constraintEnforcementDelayIndicators: List of cutoff values that will be divided evenly among the iterations. All Fourier grid points with constraintIndicators greater than the current cutoff are enforced
         :param R_freeInd_complex: 3 x 1 x num_shells tuple of (x,y,z) coordinate lists for withheld values for Rfree calculation
         :param R_freeVals_complex: Complex valued component at the indices given by R_freeInd_complex
-        :param displayFigure: Boolean flag to display figures during the reconstruction
         :return: outputs dictionary containing the reconstruction and error metrics
 
          Author: Alan (AJ) Pryor, Jr.
@@ -46,7 +47,7 @@ if __name__ != "__main__":
          University of California, Los Angeles
          Copyright 2015-2016. All rights reserved.
         """
-        import time
+
         t0 = time.time()
         if verbose:
             print("Reconstruction started")
@@ -135,70 +136,6 @@ if __name__ != "__main__":
             #replace Fourier components with ones from measured data from the current set of constraints
             k[constraintInd_complex] = measuredK[constraintInd_complex]
             initialObject = irfftn(k)
-
-            #update display
-            if displayFigure.DisplayFigureON:
-                if iterationNum % displayFigure.displayFrequency == 0:
-                    if verbose:
-                        print("n_half_x = ", n_half_x)
-                        print("half_window_y = ", half_window_y)
-                    plt.figure(1000)
-                    plt.subplot(233)
-                    plt.imshow(np.squeeze(np.fft.fftshift(initialObject)[n_half_x, n_half_y-half_window_y:n_half_y+half_window_y, n_half_z-half_window_z:n_half_z+half_window_z]))
-                    plt.title("central YZ slice")
-
-                    plt.subplot(232)
-                    plt.imshow(np.squeeze(np.fft.fftshift(initialObject)[n_half_x-half_window_x:n_half_x+half_window_x, n_half_y, n_half_z-half_window_z:n_half_z+half_window_z]))
-                    plt.title("central XZ slice")
-
-                    plt.subplot(231)
-                    plt.title("central XY slice")
-                    plt.imshow(np.squeeze(np.fft.fftshift(initialObject)[n_half_x-half_window_x:n_half_x+half_window_x, n_half_y-half_window_y:n_half_y+half_window_y, n_half_z]))
-
-                    plt.subplot(236)
-                    plt.title("YZ projection")
-                    plt.imshow(np.squeeze(np.sum(np.fft.fftshift(initialObject)[n_half_x-half_window_x:n_half_x+half_window_x, n_half_y-half_window_y:n_half_y+half_window_y, n_half_z-half_window_z:n_half_z+half_window_z], axis=0)))
-
-                    plt.subplot(235)
-                    plt.title("XZ projection")
-                    plt.imshow(np.squeeze(np.sum(np.fft.fftshift(initialObject)[n_half_x-half_window_x:n_half_x+half_window_x, n_half_y-half_window_y:n_half_y+half_window_y, n_half_z-half_window_z:n_half_z+half_window_z], axis=1)))
-
-                    plt.subplot(234)
-                    plt.title("XY projection")
-                    plt.imshow(np.squeeze(np.sum(np.fft.fftshift(initialObject)[n_half_x-half_window_x:n_half_x+half_window_x, n_half_y-half_window_y:n_half_y+half_window_y, n_half_z-half_window_z:n_half_z+half_window_z], axis=2)))
-                    plt.get_current_fig_manager().window.setGeometry(25,25,400, 400)
-                    plt.draw()
-
-                    plt.figure(2)
-                    plt.get_current_fig_manager().window.setGeometry(25,450,400, 400)
-                    plt.plot(range(0,numIterations),errK)
-                    plt.title("K-space Error vs Iteration Number")
-                    plt.xlabel("Spatial Frequency (% of Nyquist)")
-                    plt.ylabel('Reciprocal Space Error')
-                    plt.draw()
-
-                    if R_freeInd_complex:
-                        plt.figure(3)
-                        mngr = plt.get_current_fig_manager()
-                        mngr.window.setGeometry(450,25,400, 400)
-                        plt.plot(range(0,numIterations),Rfree_complex_total)
-                        plt.title("Mean R-free Value vs Iteration Number")
-                        plt.xlabel("Iteration Num")
-                        plt.ylabel('Mean R-free')
-                        plt.draw()
-
-                        plt.figure(4)
-                        mngr = plt.get_current_fig_manager()
-                        mngr.window.setGeometry(450,450,400, 400)
-                        X = np.linspace(0,1,np.shape(Rfree_complex_bybin)[0])
-                        plt.plot(X, Rfree_complex_bybin[:,iterationNum-1])
-                        plt.title("Current Rfree Value vs Spatial Frequency")
-                        plt.xlabel("Spatial Frequency (% of Nyquist)")
-                        plt.ylabel('Rfree')
-                        plt.draw()
-
-
-                    plt.pause(1e-30) #forces display to update
 
         outputs['errK'] = errK
         if R_freeInd_complex:
